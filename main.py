@@ -12,7 +12,8 @@ user_states = {}
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keys = [
         [KeyboardButton('➕add task'), KeyboardButton('📋show tasks')],
-        [KeyboardButton('✔done task')]
+        [KeyboardButton('✔done task')],
+        [KeyboardButton('help!')]
     ]
     key_markup = ReplyKeyboardMarkup(
         keyboard=keys,
@@ -81,6 +82,12 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     txt1 = '📋your tasks:'
     await update.message.reply_text(f'{txt1} \n\n {task_list} \n\n {txt}')
 
+async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    txt = '''با استفاده از add task میتونید تسک اضافه کنید اگه چند تا تسک میخواید اضافه کنید هر کدوم رو توی یک خط بنویسید
+همه تسک هاتون رو میتونید با استفاده از show task ببینید
+وقتی تسکی رو انجام دادید add task رو بزنید و عدد اون تسکی که انجام دادید رو وارد کنید'''
+    await update.message.reply_text(txt)
+
 def main():
     app = Application.builder().token(tk).build()
 
@@ -88,6 +95,7 @@ def main():
     app.add_handler(MessageHandler(filters.Text('➕add task'), add_task))
     app.add_handler(MessageHandler(filters.Text('📋show tasks'), show_tasks))
     app.add_handler(MessageHandler(filters.Text('✔done task'), done_task))
+    app.add_handler(MessageHandler(filters.Text('help!'),help))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
 
     app.run_polling()
