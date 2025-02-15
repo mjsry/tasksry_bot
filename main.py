@@ -84,8 +84,8 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     txt = '''با استفاده از add task میتونید تسک اضافه کنید اگه چند تا تسک میخواید اضافه کنید هر کدوم رو توی یک خط بنویسید
-همه تسک هاتون رو میتونید با استفاده از show task ببینید
-وقتی تسکی رو انجام دادید add task رو بزنید و عدد اون تسکی که انجام دادید رو وارد کنید'''
+همه تسک هاتون رو میتونید با استفاده از show tasks ببینید
+وقتی تسکی رو انجام دادید done task رو بزنید و عدد اون تسکی که انجام دادید رو وارد کنید'''
     await update.message.reply_text(txt)
 
 def main():
