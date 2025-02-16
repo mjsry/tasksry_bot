@@ -140,7 +140,9 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     txt = '''با استفاده از add task میتونید تسک اضافه کنید اگه چند تا تسک میخواید اضافه کنید هر کدوم رو توی یک خط بنویسید
 همه تسک هاتون رو میتونید با استفاده از show tasks ببینید
-وقتی تسکی رو انجام دادید done task رو بزنید و عدد اون تسکی که انجام دادید رو وارد کنید'''
+وقتی تسکی رو انجام دادید done task رو بزنید و عدد اون تسکی که انجام دادید رو وارد کنید
+اگه میخواید تسکی رو ویرایش کنید edit task بزنید و عدد تسکی که میخواید ویرایش کنید رو بزنید و بعدش تسک ویرایش شده رو بنویسید
+برای حذف کردن تسک هم delete task رو بزنید و عدد تسکی که میخواید حذف کنید رو بزنید'''
     await update.message.reply_text(txt)
 
 def main():
@@ -148,7 +150,7 @@ def main():
 
     app.add_handler(CommandHandler('start', start))
     app.add_handler(MessageHandler(filters.Text('➕add task'), add_task))
-    app.add_handler(MessageHandler(filters.Text('✏️edit task'), add_task))
+    app.add_handler(MessageHandler(filters.Text('✏️edit task'), edit_task))
     app.add_handler(MessageHandler(filters.Text('📋show tasks'), show_tasks))
     app.add_handler(MessageHandler(filters.Text('✔done task'), done_task))
     app.add_handler(MessageHandler(filters.Text('help!'),help))
