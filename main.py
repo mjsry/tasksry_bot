@@ -119,10 +119,14 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif user_states.get(user_id) == 'deleted_task': # deleted task
         task_number_deleted = update.effective_message.text.strip()
 
-        if task_number_deleted.isdigit():  # تبدیل به عدد
+        if task_number_deleted.isdigit():
             task_number_deleted = int(task_number_deleted)
             if task_number_deleted in tasks[user_id]:
                 del tasks[user_id][task_number_deleted]
+                new_tasks = {i + 1: task for i, task in enumerate(tasks[user_id].values())}
+                tasks[user_id] = new_tasks
+
+                user_states.pop(user_id)
 
                 txt = '✔Task successfully deleted!'
                 await update.message.reply_text(txt)
