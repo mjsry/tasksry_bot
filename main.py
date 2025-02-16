@@ -11,8 +11,8 @@ user_states = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keys = [
-        [KeyboardButton('➕add task'), KeyboardButton('📋show tasks')],
-        [KeyboardButton('✔done task')],
+        [KeyboardButton('➕add task'), KeyboardButton('✏️edit task'), KeyboardButton('🗑delete task')],
+        [KeyboardButton('✔done task'), KeyboardButton('📋show tasks')],
         [KeyboardButton('help!')]
     ]
     key_markup = ReplyKeyboardMarkup(
@@ -27,9 +27,24 @@ async def add_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     txt = '📝 Please enter your task'
     await update.message.reply_text(txt)
 
+async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_chat.id
+    if user_id in tasks and tasks[user_id]:
+        user_states[user_id] = 'edit_task'
+
+        task_list = "\n".join(
+            [f'{task_number}. {task["task"]} {"✔" if task["status"] == "done" else ""}' for task_number, task in
+             tasks[user_id].items()])
+        txt = '📝Please enter the editing task number'
+        txt1 = '📋your tasks:'
+        await update.message.reply_text(f'{txt1} \n\n {task_list} \n\n {txt}')
+    else:
+        txt = '📭 No tasks found!'
+        await update.message.reply_text(txt)
+
 async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
-    if user_states.get(user_id) == 'adding_task':
+    if user_states.get(user_id) == 'adding_task':  # add task
 
         task_text = update.effective_message.text.strip()
         if task_text :
@@ -38,6 +53,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             task_counter = max(tasks[user_id].keys(), default=0) + 1
 
+            task_text = task_text.replace('\u200c', '').strip()
             new_tasks = [task.strip() for task in task_text.splitlines() if task.strip()]
             for task in new_tasks:
                 tasks[user_id][task_counter] = {'task': task.strip(), 'status': 'not done'}
@@ -50,7 +66,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt = '⚠ Please enter a valid task!'
             await update.message.reply_text(txt)
 
-    elif user_states.get(user_id) == 'done task':
+    elif user_states.get(user_id) == 'done task':  # done task
         task_number_done = update.effective_message.text.strip()
         if task_number_done.isdigit() :
             task_number_done = int(task_number_done)
@@ -59,19 +75,46 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 user_states.pop(user_id)
                 txt = '✔Task done'
                 await update.message.reply_text(txt)
+
+    elif user_states.get(user_id) == 'edit_task': # edit task
+        task_number_edit = update.effective_message.text.strip()
+        if task_number_edit.isdigit():
+            task_number_edit = int(task_number_edit)
+            if task_number_edit in tasks[user_id] :
+                user_states[user_id] = 'editing_task'
+                user_states[f'editing_task_{user_id}'] = task_number_edit
+                txt = '✏️ Now, please enter the new text for the task'
+                await update.message.reply_text(txt)
+            else:
+                txt = '✖️Invalid task number.'
+                await update.message.reply_text(txt)
+
+
     else:
         txt = '✖️Please use the buttons'
         await update.message.reply_text(txt)
+
+async def editing_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_chat.id
+    if user_states[user_id] == 'editing_task' :
+        new_task = update.effective_message.text.strip()
+        task_number_edit = user_states[f'editing_task_{user_id}']
+        if new_task and task_number_edit :
+            tasks[user_id][task_number_edit]['task'] = new_task
+            user_states.pop(user_id)
+            user_states.pop(f'editing_task_{user_id}')
+            txt = '✔Task successfully updated!'
+            await update.message.reply_text(txt)
+        else:
+            txt = '❌ Something went wrong. Please try again.'
+            await update.message.reply_text(txt)
 
 
 async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     if user_id in tasks and tasks[user_id]:
 
-        #task_list = "\n".join([f'{task_number}.{task["task"].strip()}{"✔" if task["status"] == "done" else ""}' for task_number, task in tasks[user_id].items()])
-        task_list = "\n".join(
-            [f"{num}. {task['task'].strip()} {'✔' if task['status'] == 'done' else ''}" for num, task in
-             tasks[user_id].items()])
+        task_list = "\n".join([f'{task_number}.{task["task"].strip()}{"✔" if task["status"] == "done" else ""}' for task_number, task in tasks[user_id].items()])
 
         txt = '📋your tasks:'
         await update.message.reply_text(f'{txt} \n\n {task_list}')
@@ -105,9 +148,11 @@ def main():
 
     app.add_handler(CommandHandler('start', start))
     app.add_handler(MessageHandler(filters.Text('➕add task'), add_task))
+    app.add_handler(MessageHandler(filters.Text('✏️edit task'), add_task))
     app.add_handler(MessageHandler(filters.Text('📋show tasks'), show_tasks))
     app.add_handler(MessageHandler(filters.Text('✔done task'), done_task))
     app.add_handler(MessageHandler(filters.Text('help!'),help))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, editing_task))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
 
     app.run_polling()
