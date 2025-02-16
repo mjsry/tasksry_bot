@@ -45,7 +45,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             new_tasks = [task.strip() for task in new_tasks if task.strip()]
             for task in new_tasks:
-                tasks[user_id][task_counter] = {'task': task, 'status': 'not done'}
+                tasks[user_id][task_counter] = {'task': task.strip(), 'status': 'not done'}
                 task_counter += 1
 
             user_states.pop(user_id)
@@ -73,7 +73,7 @@ async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
     if user_id in tasks and tasks[user_id]:
 
-        task_list = "\n".join([f'{task_number}.{task["task"]}{"✔" if task["status"] == "done" else ""}' for task_number, task in tasks[user_id].items()])
+        task_list = "\n".join([f'{task_number}.{task["task"].strip()}{"✔" if task["status"] == "done" else ""}' for task_number, task in tasks[user_id].items()])
         txt = '📋your tasks:'
         await update.message.reply_text(f'{txt} \n\n {task_list}')
     else:
