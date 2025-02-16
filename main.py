@@ -194,7 +194,8 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(txt)
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    txt = '''1- با استفاده از add task تسک جدید اضافه کنید (میتونید چند تسک رو اضافه کنید فقط هر کدوم در یک باشند)
+    txt = '''
+    1- با استفاده از add task تسک جدید اضافه کنید (میتونید چند تسک رو اضافه کنید فقط هر کدوم در یک باشند)
 
 2- با استفاده از edit task شماره تسک مد نظر را وارد کنید و ادیت شده رو بنویسید
 
@@ -202,7 +203,10 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 4- با استفاده از done task شماره تسکی که تموم کردید رو وارد کنید (فعلا یک عدد وارد کنید)
 
-5-با استفاده از show tasks همه تسک هاتون رو ببینید'''
+5- با استفاده از show tasks همه تسک هاتون رو ببینید
+
+6- اگه اشتباهی دکمه ای رو زدید کافیه عبارت back یا بازگشت رو تایپ کنید تا برگرده
+    '''
     await update.message.reply_text(txt)
 
 def main():
