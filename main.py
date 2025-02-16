@@ -12,7 +12,7 @@ db = mysql.connector.connect(
     database=os.getenv("db_name"),
     port=int(os.getenv("db_port"))
 )
-cursor = db.cursor()
+
 
 tk = os.getenv('token')
 tasks = {}
