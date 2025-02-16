@@ -6,7 +6,7 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup
 
 import os
 
-tk = os.getenv('Token')
+tk = os.getenv('token')
 tasks = {}
 
 user_states = {}
