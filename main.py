@@ -44,12 +44,20 @@ async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
+    if user_id not in tasks:
+        tasks[user_id] = {}
+
+    user_input = update.effective_message.text.strip()
+    if user_input in ['back', 'بازگشت']:
+        user_states.pop(user_id)
+        txt = "ok i'm back."
+        await update.message.reply_text(txt)
+        return
+
     if user_states.get(user_id) == 'adding_task':  # add task
 
         task_text = update.effective_message.text.strip()
         if task_text :
-            if user_id not in tasks:
-                tasks[user_id] = {}
 
             task_counter = max(tasks[user_id].keys(), default=0) + 1
 
@@ -113,7 +121,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await update.message.reply_text(txt)
 
         else:
-            txt = '❌ Something went wrong. Please try again.'
+            txt = '✖️Something went wrong. Please try again.'
             await update.message.reply_text(txt)
 
     elif user_states.get(user_id) == 'deleted_task': # deleted task
@@ -186,11 +194,15 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(txt)
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    txt = '''با استفاده از add task میتونید تسک اضافه کنید اگه چند تا تسک میخواید اضافه کنید هر کدوم رو توی یک خط بنویسید
-همه تسک هاتون رو میتونید با استفاده از show tasks ببینید
-وقتی تسکی رو انجام دادید done task رو بزنید و عدد اون تسکی که انجام دادید رو وارد کنید
-اگه میخواید تسکی رو ویرایش کنید edit task بزنید و عدد تسکی که میخواید ویرایش کنید رو بزنید و بعدش تسک ویرایش شده رو بنویسید
-برای حذف کردن تسک هم delete task رو بزنید و عدد تسکی که میخواید حذف کنید رو بزنید'''
+    txt = '''1- با استفاده از add task تسک جدید اضافه کنید (میتونید چند تسک رو اضافه کنید فقط هر کدوم در یک باشند)
+
+2- با استفاده از edit task شماره تسک مد نظر را وارد کنید و ادیت شده رو بنویسید
+
+3- با استفاده از delete task شماره تسکی که میخواید رو وارد کنید تا حذف بشه
+
+4- با استفاده از done task شماره تسکی که تموم کردید رو وارد کنید (فعلا یک عدد وارد کنید)
+
+5-با استفاده از show tasks همه تسک هاتون رو ببینید'''
     await update.message.reply_text(txt)
 
 def main():
