@@ -37,7 +37,13 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 tasks[user_id] = {}
 
             task_counter = max(tasks[user_id].keys(), default=0) + 1
-            new_tasks = [task.strip() for task in task_text.splitlines() if task.strip()]
+
+            if '\n' in task_text:
+                new_tasks = task_text.split('\n')
+            else:
+                new_tasks = [task_text]
+
+            new_tasks = [task.strip() for task in new_tasks if task.strip()]
             for task in new_tasks:
                 tasks[user_id][task_counter] = {'task': task, 'status': 'not done'}
                 task_counter += 1
