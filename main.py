@@ -4,7 +4,9 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.ext import MessageHandler, filters
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 
-tk = config('Token')
+import os
+
+tk = os.getenv('Token')
 tasks = {}
 
 user_states = {}
