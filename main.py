@@ -5,14 +5,22 @@ from telegram.ext import MessageHandler, filters
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 import os
 import mysql.connector
-db = mysql.connector.connect(
-    host=os.getenv("db_host"),
-    user=os.getenv("db_user"),
-    password=os.getenv("db_pass"),
-    database=os.getenv("db_name"),
-    port=int(os.getenv("db_port"))
-)
+from urllib.parse import urlparse
 
+
+database_url = os.getenv("DATABASE_URL")
+
+if database_url:
+
+    url = urlparse(database_url)
+
+    db = mysql.connector.connect(
+        host=url.hostname,
+        user=url.username,
+        password=url.password,
+        database=url.path[1:],
+        port=url.port
+    )
 
 tk = os.getenv('token')
 tasks = {}
