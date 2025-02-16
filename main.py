@@ -152,8 +152,9 @@ def main():
     app.add_handler(MessageHandler(filters.Text('📋show tasks'), show_tasks))
     app.add_handler(MessageHandler(filters.Text('✔done task'), done_task))
     app.add_handler(MessageHandler(filters.Text('help!'),help))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, editing_task))
+
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, editing_task))
 
     app.run_polling()
 
