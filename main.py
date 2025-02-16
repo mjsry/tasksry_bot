@@ -116,19 +116,24 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt = '❌ Something went wrong. Please try again.'
             await update.message.reply_text(txt)
 
-    elif user_states.get(user_id) == 'deleted_task':
+    elif user_states.get(user_id) == 'deleted_task': # deleted task
         task_number_deleted = update.effective_message.text.strip()
-        if task_number_deleted in tasks[user_id]:
-            del tasks[user_id][task_number_deleted]
 
-            txt = '✔Task successfully deleted!'
-            await update.message.reply_text(txt)
+        if task_number_deleted.isdigit():  # تبدیل به عدد
+            task_number_deleted = int(task_number_deleted)
+            if task_number_deleted in tasks[user_id]:
+                del tasks[user_id][task_number_deleted]
+
+                txt = '✔Task successfully deleted!'
+                await update.message.reply_text(txt)
+
+            else:
+                txt = '✖️Invalid task number.'
+                await update.message.reply_text(txt)
 
         else:
-            txt = '✖️Invalid task number.'
+            txt = '✖️Please enter an English number.'
             await update.message.reply_text(txt)
-
-
 
     else:
         txt = '✖️Please use the buttons'
