@@ -7,16 +7,16 @@ import os
 import mysql.connector
 from urllib.parse import urlparse
 
-database_url = os.getenv("DATABASE_URL")
+#database_url = os.getenv("DATABASE_URL")
 
-url = urlparse(database_url)
+#url = urlparse(database_url)
 
 db = mysql.connector.connect(
-        host=url.hostname,
-        user=url.username,
-        password=url.password,
-        database=url.path[1:],
-        port=url.port
+        host=os.getenv('db_host'),
+        user=os.getenv('db_user'),
+        password=os.getenv('db_pass'),
+        database=os.getenv('db_name'),
+        port=os.getenv('db_port')
     )
 cursor = db.cursor()
 def creat_table():
