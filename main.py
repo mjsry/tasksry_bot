@@ -16,7 +16,7 @@ db = mysql.connector.connect(
         user=url.username,
         password=url.password,
         database=url.path[1:],
-        port=url.port
+        port=int(url.port)
     )
 cursor = db.cursor()
 def creat_table():
