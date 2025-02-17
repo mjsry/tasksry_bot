@@ -19,7 +19,7 @@ if database_url:
         database=url.path[1:],
         port=url.port
     )
-cursor = db.cursor()
+    cursor = db.cursor()
 def creat_table():
     query = """CREATE TABLE IF NOT EXISTS tasks (
         id INT AUTO_INCREMENT PRIMARY KEY,
