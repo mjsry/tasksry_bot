@@ -8,18 +8,17 @@ import mysql.connector
 from urllib.parse import urlparse
 
 database_url = os.getenv("DATABASE_URL")
-if database_url:
 
-    url = urlparse(database_url)
+url = urlparse(database_url)
 
-    db = mysql.connector.connect(
+db = mysql.connector.connect(
         host=url.hostname,
         user=url.username,
         password=url.password,
         database=url.path[1:],
         port=url.port
     )
-    cursor = db.cursor()
+cursor = db.cursor()
 def creat_table():
     query = """CREATE TABLE IF NOT EXISTS tasks (
         id INT AUTO_INCREMENT PRIMARY KEY,
