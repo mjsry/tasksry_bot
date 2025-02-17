@@ -7,17 +7,13 @@ import os
 import mysql.connector
 from urllib.parse import urlparse
 
-database_url = os.getenv("DATABASE_URL")
-
-url = urlparse(database_url)
-
 db = mysql.connector.connect(
-        host=url.hostname,
-        user=url.username,
-        password=url.password,
-        database=url.path[1:],
-        port=url.port if url.port else 3306
-    )
+    host="mysql.railway.internal",   # یا به جای آن IP سرور را بگذارید
+    user="root",
+    password="ikbOMRXmEBUyeFcmTtTYgvpymkeEEcCS",
+    database="railway",
+    port=3306
+)
 cursor = db.cursor()
 def creat_table():
     query = """CREATE TABLE IF NOT EXISTS tasks (
