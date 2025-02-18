@@ -32,7 +32,6 @@ def creat_table():
 
 creat_table()
 tk = os.getenv('token')
-tasks = {}
 
 user_states = {}
 
