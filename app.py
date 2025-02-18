@@ -20,6 +20,10 @@ db = mysql.connector.connect(
     )
 cursor = db.cursor()
 def creat_table():
+    query1 = 'DROP TABLE IF EXISTS tasks;'
+    cursor.execute(query1)
+    db.commit()
+
     query = """CREATE TABLE IF NOT EXISTS tasks (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
