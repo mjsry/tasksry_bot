@@ -3,6 +3,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.ext import MessageHandler, filters
 from telegram import KeyboardButton, ReplyKeyboardMarkup
+from telegram import Bot
 import os
 import mysql.connector
 from urllib.parse import urlparse
@@ -35,9 +36,19 @@ def creat_table():
     db.commit()
 
 #creat_table()
-tk = os.getenv('token')
-tasks = {}
 
+tk = os.getenv('token')
+
+def send_message():
+    bot = Bot(token=tk)
+    query = 'SELECT user_id FROM tasks'
+    cursor.execute(query)
+    users_id = cursor.fetchone()
+    for user_id in users_id:
+        txt = 'hey you bot is ready!'
+        bot.send_message(chat_id=user_id, text=txt)
+
+send_message()
 user_states = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
