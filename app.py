@@ -1,4 +1,3 @@
-from decouple import config
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.ext import MessageHandler, filters
