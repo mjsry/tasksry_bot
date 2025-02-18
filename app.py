@@ -42,14 +42,14 @@ def send_message():
     bot = Bot(token=tk)
     query = 'SELECT user_id FROM tasks'
     cursor.execute(query)
-    users_id = cursor.fetchone()
-    for user_id in users_id:
+    users_id = cursor.fetchall()
+    for user_id_tuple in users_id:
         try :
-            users_id = users_id[0]
+            user_id = user_id_tuple[0]
             txt = 'hey you bot is ready!'
             bot.send_message(chat_id=user_id, text=txt)
         except:
-            break
+            continue
 
 send_message()
 user_states = {}
