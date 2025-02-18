@@ -7,16 +7,16 @@ import os
 import mysql.connector
 from urllib.parse import urlparse
 
-#database_url = os.getenv("DATABASE_URL")
+database_url = os.getenv("DATABASE_URL")
 
-#url = urlparse(database_url)
+url = urlparse(database_url)
 
 db = mysql.connector.connect(
-        host=os.getenv('db_host'),
-        user=os.getenv('db_user'),
-        password=os.getenv('db_pass'),
-        database=os.getenv('db_name'),
-        port=os.getenv('db_port')
+        host=url.hostname,
+        user=url.username,
+        password=url.password,
+        database=url.path[1:],
+        port=url.port if url.port else 3306
     )
 cursor = db.cursor()
 def creat_table():
@@ -31,7 +31,7 @@ def creat_table():
     db.commit()
 
 creat_table()
-tk = os.getenv('token')
+tk = os.getenv('TOKEN')
 tasks = {}
 
 user_states = {}
