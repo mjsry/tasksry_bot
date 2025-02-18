@@ -35,7 +35,7 @@ def creat_table():
     cursor.execute(query)
     db.commit()
 
-#creat_table()
+creat_table()
 
 tk = os.getenv('token')
 
@@ -45,8 +45,12 @@ def send_message():
     cursor.execute(query)
     users_id = cursor.fetchone()
     for user_id in users_id:
-        txt = 'hey you bot is ready!'
-        bot.send_message(chat_id=user_id, text=txt)
+        try :
+            users_id = users_id[0]
+            txt = 'hey you bot is ready!'
+            bot.send_message(chat_id=user_id, text=txt)
+        except:
+            break
 
 send_message()
 user_states = {}
