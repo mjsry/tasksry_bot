@@ -92,7 +92,7 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task["id"]}. {task["task"].strip()}{" ✔" if task["status"] == "done" else ""}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in
                  tasks_db])
         txt = '🗑Enter the task number you want to delete.'
         txt1 = '📋your tasks:'
