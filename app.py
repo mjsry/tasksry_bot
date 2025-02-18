@@ -157,7 +157,7 @@ def task_exists(user_id, task_number):
     query = "SELECT COUNT(*) as count FROM tasks WHERE user_id = %s AND id = %s"
     cursor.execute(query, (user_id, task_number))
     result = cursor.fetchone()
-    return result and result["count"] > 0
+    return result and result[0] > 0
 
 async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
