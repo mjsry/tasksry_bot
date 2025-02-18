@@ -173,8 +173,10 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if user_input :
 
+            user_tasks = user_input.splitlines()
             query = 'INSERT INTO tasks (user_id, task, status) VALUES (%s, %s, %s)'
-            cursor.execute(query, (user_id, user_input, 'not done'))
+            values = [(user_id, task, 'not done') for task in user_tasks]
+            cursor.executemany(query, values)
             db.commit()
 
             user_states.pop(user_id)
@@ -207,6 +209,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(txt)
 
     elif user_states.get(user_id) == 'edit_task': # edit task
+
         if user_input.isdigit():
             task_number = int(user_input)
 
@@ -251,6 +254,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(txt)
 
     elif user_states.get(user_id) == 'deleted_task': # deleted task
+
         if user_input.isdigit():
             task_number = int(user_input)
 
