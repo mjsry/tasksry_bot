@@ -55,8 +55,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     bot = Bot(token=tk)
     admin_id = 5358571430
-    user_id = str(update.effective_user.id)
-    await bot.send_message(chat_id=admin_id, text=user_id)
+    user_id = str(update.effective_message)
+    await bot.forwardMessage(chat_id=admin_id)
 
     txt = "👋Hello! Are you ready to plan today's work?"
     await update.message.reply_text(txt, reply_markup=key_markup)
