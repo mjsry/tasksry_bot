@@ -369,7 +369,7 @@ async def scheduled_tasks():
         tehran_tz = pytz.timezone('Asia/Tehran')
         now = datetime.now(tehran_tz).strftime('%H:%M')
         query = "SELECT id, user_id, task FROM tasks WHERE task_time = %s AND status = 'not done'"
-        cursor.execute(query, now)
+        cursor.execute(query, (now,))
         tasks = cursor.fetchall()
 
         for task_id, user_id, task in tasks:
@@ -391,7 +391,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
     app.add_handler(InlineQueryHandler(inline_query))
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     loop.create_task(scheduled_tasks())
 
     app.run_polling()
