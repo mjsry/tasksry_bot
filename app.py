@@ -158,7 +158,7 @@ async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f"{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""} {"  -  " + str(task[3])[:-3] if task[3] else ""}" for task in
+                [f"{task[0]}. {task[1].strip()} {" - " + str(task[3])[:-3] if task[3] else ""}{" ✔" if task[2] == "done" else ""}" for task in
                  tasks_db])
 
             txt = '📋your tasks:'
