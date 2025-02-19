@@ -52,7 +52,8 @@ async def send_message():
         except:
             continue
 
-asyncio.run(send_message())
+loop = asyncio.get_event_loop()
+loop.run_until_complete(send_message())
 user_states = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
