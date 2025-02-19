@@ -41,7 +41,7 @@ def creat_table():
     )"""
     cursor.execute(query)
     db.commit()
-creat_table()
+#creat_table()
 
 tk = os.getenv('token')
 
@@ -149,13 +149,13 @@ async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = cursor.fetchone()
     if result and result[0] > 0:
 
-        query = "SELECT id, task, status FROM tasks WHERE user_id = %s"
+        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""} - {task[3]}' for task in
                  tasks_db])
 
             txt = '📋your tasks:'
@@ -330,13 +330,13 @@ async def show_tasks_inline(user_id):
     result = cursor.fetchone()
 
     if result and result[0] > 0:
-        query = "SELECT id, task, status FROM tasks WHERE user_id = %s"
+        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in tasks_db]
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""} - {task[3]}' for task in tasks_db]
             )
 
             return f'📋 Your tasks:\n\n{task_list}'
@@ -366,18 +366,23 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def scheduled_tasks():
     bot = Bot(token=tk)
     while True:
-        tehran_tz = pytz.timezone('Asia/Tehran')
-        now = datetime.now(tehran_tz).strftime('%H:%M')
-        query = "SELECT id, user_id, task FROM tasks WHERE task_time = %s AND status = 'not done'"
-        cursor.execute(query, (now,))
-        tasks = cursor.fetchall()
+        query = "SELECT COUNT(*) as count FROM tasks WHERE task_time IS NOT NULL AND status = 'not done'"
+        cursor.execute(query)
+        result = cursor.fetchone()
+        if result and result[0] > 0 :
 
-        for task_id, user_id, task in tasks:
-            txt = f'Hey, now is the time to do it! {task}'
-            await bot.send_message(chat_id=user_id, text=txt)
+            tehran_tz = pytz.timezone('Asia/Tehran')
+            now = datetime.now(tehran_tz).strftime('%H:%M')
+            query = "SELECT id, user_id, task FROM tasks WHERE task_time = %s AND status = 'not done'"
+            cursor.execute(query, (now,))
+            tasks = cursor.fetchall()
+
+            for task_id, user_id, task in tasks:
+                txt = f'Hey, now is the time to do it! {task}'
+                await bot.send_message(chat_id=user_id, text=txt)
         await asyncio.sleep(60)
 
-def main():
+async def main():
     app = Application.builder().token(tk).build()
 
     app.add_handler(CommandHandler('start', start))
@@ -391,10 +396,9 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
     app.add_handler(InlineQueryHandler(inline_query))
 
-    loop = asyncio.get_event_loop()
-    loop.create_task(scheduled_tasks())
+    asyncio.create_task(scheduled_tasks())
 
-    app.run_polling()
+    await app.run_polling()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
