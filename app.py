@@ -84,8 +84,9 @@ async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in
                  tasks_db])
+
         txt = '📝Please enter the editing task number'
         txt1 = '📋your tasks:'
         await update.message.reply_text(f'{txt1} \n\n {task_list} \n\n {txt}')
@@ -108,8 +109,9 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in
                  tasks_db])
+
         txt = '🗑Enter the task number you want to delete.'
         txt1 = '📋your tasks:'
         await update.message.reply_text(f'{txt1} \n\n {task_list} \n\n {txt}')
@@ -132,8 +134,9 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in
                  tasks_db])
+
         txt = '📝Enter the completed task number.'
         txt1 = '📋your tasks:'
         await update.message.reply_text(f'{txt1} \n\n {task_list} \n\n {txt}')
@@ -155,7 +158,7 @@ async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""} - {task[3]}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in
                  tasks_db])
 
             txt = '📋your tasks:'
@@ -336,7 +339,7 @@ async def show_tasks_inline(user_id):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""} - {task[3]}' for task in tasks_db]
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in tasks_db]
             )
 
             return f'📋 Your tasks:\n\n{task_list}'
@@ -378,7 +381,7 @@ async def scheduled_tasks():
             tasks = cursor.fetchall()
 
             for task_id, user_id, task in tasks:
-                txt = f'Hey, now is the time to do it! {task}'
+                txt = f'👋🫵Hey, now is the time to do it! ({task})'
                 await bot.send_message(chat_id=user_id, text=txt)
         await asyncio.sleep(60)
 
