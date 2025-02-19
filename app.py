@@ -47,7 +47,7 @@ def send_message():
         try :
             user_id = user_id_tuple[0]
             txt = 'hey you bot is ready!'
-            bot.send_message(chat_id=user_id, text=txt)
+            bot.sendMessage(chat_id=user_id, text=txt)
         except:
             continue
 
