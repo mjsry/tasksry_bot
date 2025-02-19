@@ -32,11 +32,12 @@ def creat_table():
         user_id BIGINT NOT NULL,
         task TEXT NOT NULL,
         status ENUM('not done', 'done') DEFAULT 'not done',
+        task_time TIME DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )"""
     cursor.execute(query)
     db.commit()
-#creat_table()
+creat_table()
 
 tk = os.getenv('token')
 
