@@ -327,7 +327,7 @@ async def main():
     app.add_handler(MessageHandler(filters.Text('help!'),help))
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
-    await send_message()
+    #await send_message()
 
     app.run_polling()
 
