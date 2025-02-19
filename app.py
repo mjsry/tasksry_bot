@@ -38,7 +38,7 @@ def creat_table():
 
 tk = os.getenv('token')
 
-def send_message():
+async def send_message():
     bot = Bot(token=tk)
     query = 'SELECT user_id FROM tasks'
     cursor.execute(query)
@@ -47,7 +47,7 @@ def send_message():
         try :
             user_id = user_id_tuple[0]
             txt = 'hey you bot is ready!'
-            bot.sendMessage(chat_id=user_id, text=txt)
+            await bot.sendMessage(chat_id=user_id, text=txt)
         except:
             continue
 
