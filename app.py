@@ -242,7 +242,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             if task_exists(user_id, task_number):
 
-                query = 'UPDATE tasks SET task = %s WHERE user_id = %s AND id = %s'
+                query = 'UPDATE tasks SET task = %s AND status = "not done" WHERE user_id = %s AND id = %s'
                 cursor.execute(query, (user_input, user_id, task_number))
                 db.commit()
 
