@@ -48,8 +48,8 @@ async def send_message():
         try :
             user_id = user_id_tuple[0]
             txt = 'hey you bot is ready!'
-            async with bot:
-                await bot.send_message(text=txt, chat_id=user_id)
+
+            await bot.send_message(text=txt, chat_id=user_id)
         except:
             continue
 
@@ -332,4 +332,4 @@ async def main():
     app.run_polling()
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
