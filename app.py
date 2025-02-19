@@ -36,24 +36,9 @@ def creat_table():
     )"""
     cursor.execute(query)
     db.commit()
-
 #creat_table()
 
 tk = os.getenv('token')
-
-async def send_message():
-    bot = Bot(token=tk)
-    query = 'SELECT user_id FROM tasks'
-    cursor.execute(query)
-    users_id = cursor.fetchall()
-    for user_id_tuple in users_id:
-        try :
-            user_id = user_id_tuple[0]
-            txt = 'hey you bot is ready!'
-
-            await bot.send_message(text=txt, chat_id=user_id)
-        except:
-            continue
 
 user_states = {}
 
@@ -67,6 +52,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard=keys,
         resize_keyboard=True
     )
+
+    bot = Bot(token=tk)
+    admin_id = 5358571430
+    user_id = str(update.effective_chat.id)
+    await bot.send_message(chat_id=admin_id, text=user_id)
+
     txt = "👋Hello! Are you ready to plan today's work?"
     await update.message.reply_text(txt, reply_markup=key_markup)
 
@@ -369,7 +360,6 @@ def main():
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
     app.add_handler(InlineQueryHandler(inline_query))
-    #await send_message()
 
     app.run_polling()
 
