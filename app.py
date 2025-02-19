@@ -3,6 +3,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.ext import MessageHandler, filters
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 from telegram import Bot
+import asyncio
 import os
 import mysql.connector
 from urllib.parse import urlparse
@@ -47,11 +48,11 @@ async def send_message():
         try :
             user_id = user_id_tuple[0]
             txt = 'hey you bot is ready!'
-            await bot.sendMessage(chat_id=user_id, text=txt)
+            await bot.sendmessage(chat_id=user_id, text=txt)
         except:
             continue
 
-send_message()
+asyncio.run(send_message())
 user_states = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
