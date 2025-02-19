@@ -313,7 +313,9 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     txt = '''
-    1- با استفاده از add task تسک جدید اضافه کنید (میتونید چند تسک رو اضافه کنید فقط هر کدوم در یک باشند)
+1- با استفاده از add task تسک جدید اضافه کنید (میتونید چند تسک رو اضافه کنید فقط هر کدوم در یک باشند)
+برای اضافه کردن تسک تایم دار (که سر ساعت بهتون پیام میده) کافیه در این قالب تسک تون رو وارد کنید :
+درس-HH:MM برای مثال : درس-20:30 یعنی ساعت هشت و سی دقیقه
 
 2- با استفاده از edit task شماره تسک مد نظر را وارد کنید و ادیت شده رو بنویسید
 
@@ -381,7 +383,7 @@ async def scheduled_tasks():
             tasks = cursor.fetchall()
 
             for task_id, user_id, task in tasks:
-                txt = f'👋🫵Hey, now is the time to do it! ({task})'
+                txt = f'👋🫵Hey you now is the time to do it!   ({task})'
                 await bot.send_message(chat_id=user_id, text=txt)
         await asyncio.sleep(60)
 
