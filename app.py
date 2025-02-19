@@ -2,8 +2,10 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.ext import MessageHandler, filters, InlineQueryHandler
 from telegram import KeyboardButton, ReplyKeyboardMarkup
-from telegram import Bot
+from telegram import Bot, InlineQueryResultArticle, InputTextMessageContent
+from telegram.constants import ParseMode
 import asyncio
+import uuid
 import os
 import mysql.connector
 from urllib.parse import urlparse
@@ -315,6 +317,41 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''
     await update.message.reply_text(txt)
 
+async def show_tasks_inline(user_id):
+    query = "SELECT COUNT(*) FROM tasks WHERE user_id = %s"
+    cursor.execute(query, (user_id,))
+    result = cursor.fetchone()
+
+    if result and result[0] > 0:
+        query = "SELECT id, task, status FROM tasks WHERE user_id = %s"
+        cursor.execute(query, (user_id,))
+        tasks_db = cursor.fetchall()
+
+        if tasks_db:
+            task_list = "\n".join(
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in tasks_db]
+            )
+
+            return f'📋 Your tasks:\n\n{task_list}'
+    return '📭 No tasks found!'
+
+async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = str(update.inline_query.query)
+    if query == '':
+        return
+
+    user_id = update.inline_query.from_user.id
+    result_text = await show_tasks_inline(user_id)
+    result = [
+        InlineQueryResultArticle(
+            id=str(uuid.uuid4()),
+            title='show your tasks',
+            input_message_content=InputTextMessageContent(message_text=result_text),
+            description='share your tasks with others.'
+        )
+    ]
+    await update.inline_query.answer(result)
+
 async def main():
     app = Application.builder().token(tk).build()
 
@@ -327,6 +364,7 @@ async def main():
     app.add_handler(MessageHandler(filters.Text('help!'),help))
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
+    app.add_handler(InlineQueryHandler(inline_query))
     #await send_message()
 
     app.run_polling()
