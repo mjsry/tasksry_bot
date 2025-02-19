@@ -78,7 +78,7 @@ async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if result and result[0] > 0:
         user_states[user_id] = 'edit_task'
 
-        query = "SELECT id, task, status FROM tasks WHERE user_id = %s"
+        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
@@ -103,7 +103,7 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if result and result[0] > 0:
         user_states[user_id] = 'deleted_task'
 
-        query = "SELECT id, task, status FROM tasks WHERE user_id = %s"
+        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
@@ -128,7 +128,7 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if result and result[0] > 0:
         user_states[user_id] = 'done task'
 
-        query = "SELECT id, task, status FROM tasks WHERE user_id = %s"
+        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
