@@ -382,7 +382,7 @@ async def scheduled_tasks():
                 await bot.send_message(chat_id=user_id, text=txt)
         await asyncio.sleep(60)
 
-async def main():
+def main():
     app = Application.builder().token(tk).build()
 
     app.add_handler(CommandHandler('start', start))
@@ -396,11 +396,10 @@ async def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
     app.add_handler(InlineQueryHandler(inline_query))
 
-    asyncio.create_task(scheduled_tasks())
+    loop = asyncio.get_event_loop()
+    loop.create_task(scheduled_tasks())
 
-    await app.run_polling()
+    app.run_polling()
 
 if __name__ == '__main__':
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(main())
+    main()
