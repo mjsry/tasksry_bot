@@ -1,7 +1,7 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.ext import MessageHandler, filters, InlineQueryHandler
-from telegram import KeyboardButton, ReplyKeyboardMarkup
+from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram import Bot, InlineQueryResultArticle, InputTextMessageContent
 from telegram.constants import ParseMode
 import asyncio
@@ -340,6 +340,9 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query == '':
         return
 
+    keys = [[InlineKeyboardButton('go to bot', 't.me/tasksry_bot')]]
+    markup = InlineKeyboardMarkup(keys)
+
     user_id = update.inline_query.from_user.id
     result_text = await show_tasks_inline(user_id)
     result = [
@@ -347,7 +350,8 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             id=str(uuid.uuid4()),
             title='show your tasks',
             input_message_content=InputTextMessageContent(message_text=result_text),
-            description='share your tasks with others.'
+            description='share your tasks with others.',
+            reply_markup=markup
         )
     ]
     await update.inline_query.answer(result)
