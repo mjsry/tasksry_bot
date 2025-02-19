@@ -53,9 +53,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         resize_keyboard=True
     )
 
-    bot = Bot(token=tk)
-    admin_id = 5358571430
-    user_id = str(update.effective_message)
+    admin_id = os.getenv('admin_id')
     await update.message.forward(chat_id=admin_id)
 
     txt = "👋Hello! Are you ready to plan today's work?"
