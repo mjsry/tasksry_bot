@@ -37,7 +37,7 @@ def creat_table():
     )"""
     cursor.execute(query)
     db.commit()
-creat_table()
+#creat_table()
 
 tk = os.getenv('token')
 
