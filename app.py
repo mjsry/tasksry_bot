@@ -9,6 +9,8 @@ import uuid
 import os
 import mysql.connector
 from urllib.parse import urlparse
+from datetime import datetime
+import re
 
 database_url = os.getenv("DATABASE_URL")
 
@@ -179,16 +181,34 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_states.get(user_id) == 'adding_task':  # add task
 
         if user_input :
+            user_tasks = [t for t in user_input.splitlines()]
+            pattern = re.compile(r'(.+)-(\d{2}):(\d{2})$')
 
-            user_tasks = user_input.splitlines()
-            query = 'INSERT INTO tasks (user_id, task, status) VALUES (%s, %s, %s)'
-            values = [(user_id, task, 'not done') for task in user_tasks]
-            cursor.executemany(query, values)
-            db.commit()
+            for task in user_tasks:
+                match = pattern.match(task)
+                if match:
+                    task_text = match.group(1).strip()
+                    hour, minute = int(match.group(2)), int(match.group(3))
+                    task_time = f"{hour:02}:{minute:02}:00"
+                else:
+                    task_text = task
+                    task_time = None
+
+                try:
+                    query = 'INSERT INTO tasks (user_id, task, status, task_time) VALUES (%s, %s, %s, %s)'
+                    values = (user_id, task_text, 'not done', task_time)
+                    cursor.execute(query, values)
+                    db.commit()
+
+                except:
+                    txt = '✖️error saved task.'
+                    await update.message.reply_text(txt)
+                    continue
 
             user_states.pop(user_id)
             txt = '✔Your task has been saved.'
             await update.message.reply_text(txt)
+
         else:
             txt = '⚠ Please enter a valid task!'
             await update.message.reply_text(txt)
