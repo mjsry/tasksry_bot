@@ -84,7 +84,7 @@ async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3] if task[3] else ""}' for task in
                  tasks_db])
 
         txt = '📝Please enter the editing task number'
@@ -109,7 +109,7 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3] if task[3] else ""}' for task in
                  tasks_db])
 
         txt = '🗑Enter the task number you want to delete.'
@@ -134,7 +134,7 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3] if task[3] else ""}' for task in
                  tasks_db])
 
         txt = '📝Enter the completed task number.'
@@ -158,7 +158,7 @@ async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3] if task[3] else ""}' for task in
                  tasks_db])
 
             txt = '📋your tasks:'
@@ -339,8 +339,9 @@ async def show_tasks_inline(user_id):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3]}' for task in tasks_db]
-            )
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}  -  {task[3][:-3] if task[3] else ""}' for task in
+                 tasks_db])
+
 
             return f'📋 Your tasks:\n\n{task_list}'
     return '📭 No tasks found!'
