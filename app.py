@@ -1,3 +1,4 @@
+import telegram
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.ext import MessageHandler, filters, InlineQueryHandler
@@ -362,7 +363,8 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.inline_query.answer(result)
 
-async def scheduled_tasks(app):
+async def scheduled_tasks():
+    bot = Bot(token=tk)
     while True:
         tehran_tz = pytz.timezone('Asia/Tehran')
         now = datetime.now(tehran_tz).strftime('%H:%M')
@@ -372,7 +374,7 @@ async def scheduled_tasks(app):
 
         for task_id, user_id, task in tasks:
             txt = f'Hey, now is the time to do it! {task}'
-            await app.bot.send_message(chat_id=user_id, text=txt)
+            await bot.send_message(chat_id=user_id, text=txt)
             await asyncio.sleep(60)
 
 def main():
@@ -390,7 +392,7 @@ def main():
     app.add_handler(InlineQueryHandler(inline_query))
 
     loop = asyncio.get_event_loop()
-    loop.create_task(scheduled_tasks(app))
+    loop.create_task(scheduled_tasks())
 
     app.run_polling()
 
