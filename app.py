@@ -11,6 +11,7 @@ import mysql.connector
 from urllib.parse import urlparse
 from datetime import datetime
 import re
+import pytz
 
 database_url = os.getenv("DATABASE_URL")
 
@@ -363,7 +364,8 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def scheduled_tasks(app):
     while True:
-        now = datetime.now().strftime("%H:%M:%S")
+        tehran_tz = pytz.timezone('Asia/Tehran')
+        now = datetime.now(tehran_tz).strftime('%H:%M')
         query = "SELECT id, user_id, task FROM tasks WHERE task_time = %s AND status = 'not done'"
         cursor.execute(query, now)
         tasks = cursor.fetchall()
