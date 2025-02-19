@@ -352,7 +352,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.inline_query.answer(result)
 
-async def main():
+def main():
     app = Application.builder().token(tk).build()
 
     app.add_handler(CommandHandler('start', start))
@@ -367,7 +367,7 @@ async def main():
     app.add_handler(InlineQueryHandler(inline_query))
     #await send_message()
 
-    await app.run_polling()
+    app.run_polling()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
