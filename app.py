@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
-from telegram.ext import MessageHandler, filters
+from telegram.ext import MessageHandler, filters, InlineQueryHandler
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 from telegram import Bot
 import asyncio
@@ -48,13 +48,11 @@ async def send_message():
         try :
             user_id = user_id_tuple[0]
             txt = 'hey you bot is ready!'
-            await bot.sendmessage(chat_id=user_id, text=txt)
+            async with bot:
+                await bot.send_message(text=txt, chat_id=user_id)
         except:
             continue
-
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-loop.run_until_complete(send_message())
+send_message()
 user_states = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
