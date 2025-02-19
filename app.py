@@ -391,7 +391,7 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
     app.add_handler(InlineQueryHandler(inline_query))
 
-    loop = asyncio.get_running_loop()
+    loop = asyncio.get_event_loop()
     loop.create_task(scheduled_tasks())
 
     app.run_polling()
