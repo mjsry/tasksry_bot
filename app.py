@@ -52,7 +52,7 @@ async def send_message():
                 await bot.send_message(text=txt, chat_id=user_id)
         except:
             continue
-send_message()
+
 user_states = {}
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -315,7 +315,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''
     await update.message.reply_text(txt)
 
-def main():
+async def main():
     app = Application.builder().token(tk).build()
 
     app.add_handler(CommandHandler('start', start))
@@ -327,6 +327,7 @@ def main():
     app.add_handler(MessageHandler(filters.Text('help!'),help))
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
+    await send_message()
 
     app.run_polling()
 
