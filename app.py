@@ -1,8 +1,11 @@
-from decouple import config
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
-from telegram.ext import MessageHandler, filters
-from telegram import KeyboardButton, ReplyKeyboardMarkup
+from telegram.ext import MessageHandler, filters, InlineQueryHandler
+from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import Bot, InlineQueryResultArticle, InputTextMessageContent
+from telegram.constants import ParseMode
+import asyncio
+import uuid
 import os
 import mysql.connector
 from urllib.parse import urlparse
@@ -20,17 +23,22 @@ db = mysql.connector.connect(
     )
 cursor = db.cursor()
 def creat_table():
+    query1 = 'DROP TABLE IF EXISTS tasks;'
+    cursor.execute(query1)
+    db.commit()
+
     query = """CREATE TABLE IF NOT EXISTS tasks (
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id BIGINT NOT NULL,
         task TEXT NOT NULL,
         status ENUM('not done', 'done') DEFAULT 'not done',
+        task_time TIME DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )"""
     cursor.execute(query)
     db.commit()
+#creat_table()
 
-creat_table()
 tk = os.getenv('token')
 
 user_states = {}
@@ -45,6 +53,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         keyboard=keys,
         resize_keyboard=True
     )
+
+    admin_id = os.getenv('admin_id')
+    await update.message.forward(chat_id=admin_id)
+
     txt = "👋Hello! Are you ready to plan today's work?"
     await update.message.reply_text(txt, reply_markup=key_markup)
 
@@ -68,7 +80,7 @@ async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task["id"]}. {task["task"].strip()}{" ✔" if task["status"] == "done" else ""}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in
                  tasks_db])
         txt = '📝Please enter the editing task number'
         txt1 = '📋your tasks:'
@@ -92,7 +104,7 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task["id"]}. {task["task"].strip()}{" ✔" if task["status"] == "done" else ""}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in
                  tasks_db])
         txt = '🗑Enter the task number you want to delete.'
         txt1 = '📋your tasks:'
@@ -116,7 +128,7 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if tasks_db:
             task_list = "\n".join(
-                [f'{task["id"]}. {task["task"].strip()}{" ✔" if task["status"] == "done" else ""}' for task in
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in
                  tasks_db])
         txt = '📝Enter the completed task number.'
         txt1 = '📋your tasks:'
@@ -152,7 +164,7 @@ def task_exists(user_id, task_number):
     query = "SELECT COUNT(*) as count FROM tasks WHERE user_id = %s AND id = %s"
     cursor.execute(query, (user_id, task_number))
     result = cursor.fetchone()
-    return result and result["count"] > 0
+    return result and result[0] > 0
 
 async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
@@ -168,8 +180,10 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if user_input :
 
+            user_tasks = user_input.splitlines()
             query = 'INSERT INTO tasks (user_id, task, status) VALUES (%s, %s, %s)'
-            cursor.execute(query, (user_id, user_input, 'not done'))
+            values = [(user_id, task, 'not done') for task in user_tasks]
+            cursor.executemany(query, values)
             db.commit()
 
             user_states.pop(user_id)
@@ -202,6 +216,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(txt)
 
     elif user_states.get(user_id) == 'edit_task': # edit task
+
         if user_input.isdigit():
             task_number = int(user_input)
 
@@ -228,7 +243,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             if task_exists(user_id, task_number):
 
-                query = 'UPDATE tasks SET task = %s WHERE user_id = %s AND id = %s'
+                query = "UPDATE tasks SET task = %s , status = 'not done' WHERE user_id = %s AND id = %s"
                 cursor.execute(query, (user_input, user_id, task_number))
                 db.commit()
 
@@ -246,6 +261,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text(txt)
 
     elif user_states.get(user_id) == 'deleted_task': # deleted task
+
         if user_input.isdigit():
             task_number = int(user_input)
 
@@ -291,6 +307,45 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     '''
     await update.message.reply_text(txt)
 
+async def show_tasks_inline(user_id):
+    query = "SELECT COUNT(*) FROM tasks WHERE user_id = %s"
+    cursor.execute(query, (user_id,))
+    result = cursor.fetchone()
+
+    if result and result[0] > 0:
+        query = "SELECT id, task, status FROM tasks WHERE user_id = %s"
+        cursor.execute(query, (user_id,))
+        tasks_db = cursor.fetchall()
+
+        if tasks_db:
+            task_list = "\n".join(
+                [f'{task[0]}. {task[1].strip()}{" ✔" if task[2] == "done" else ""}' for task in tasks_db]
+            )
+
+            return f'📋 Your tasks:\n\n{task_list}'
+    return '📭 No tasks found!'
+
+async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = str(update.inline_query.query)
+    if query == '':
+        return
+
+    keys = [[InlineKeyboardButton('go to bot', 't.me/tasksry_bot')]]
+    markup = InlineKeyboardMarkup(keys)
+
+    user_id = update.inline_query.from_user.id
+    result_text = await show_tasks_inline(user_id)
+    result = [
+        InlineQueryResultArticle(
+            id=str(uuid.uuid4()),
+            title='show your tasks',
+            input_message_content=InputTextMessageContent(message_text=result_text),
+            description='share your tasks with others.',
+            reply_markup=markup
+        )
+    ]
+    await update.inline_query.answer(result)
+
 def main():
     app = Application.builder().token(tk).build()
 
@@ -303,7 +358,9 @@ def main():
     app.add_handler(MessageHandler(filters.Text('help!'),help))
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
+    app.add_handler(InlineQueryHandler(inline_query))
 
     app.run_polling()
 
-main()
+if __name__ == '__main__':
+    main()
