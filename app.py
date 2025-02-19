@@ -39,7 +39,7 @@ def creat_table():
     )"""
     cursor.execute(query)
     db.commit()
-#creat_table()
+creat_table()
 
 tk = os.getenv('token')
 
@@ -194,16 +194,11 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     task_text = task
                     task_time = None
 
-                try:
-                    query = 'INSERT INTO tasks (user_id, task, status, task_time) VALUES (%s, %s, %s, %s)'
-                    values = (user_id, task_text, 'not done', task_time)
-                    cursor.execute(query, values)
-                    db.commit()
 
-                except:
-                    txt = '✖️error saved task.'
-                    await update.message.reply_text(txt)
-                    continue
+                query = 'INSERT INTO tasks (user_id, task, status, task_time) VALUES (%s, %s, %s, %s)'
+                values = (user_id, task_text, 'not done', task_time)
+                cursor.execute(query, values)
+                db.commit()
 
             user_states.pop(user_id)
             txt = '✔Your task has been saved.'
@@ -366,6 +361,18 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.inline_query.answer(result)
 
+async def scheduled_tasks(app):
+    while True:
+        now = datetime.now().strftime("%H:%M:%S")
+        query = "SELECT id, user_id, task FROM tasks WHERE task_time = %s AND status = 'not done'"
+        cursor.execute(query, now)
+        tasks = cursor.fetchall()
+
+        for task_id, user_id, task in tasks:
+            txt = f'Hey, now is the time to do it! {task}'
+            await app.bot.send_message(chat_id=user_id, text=txt)
+            await asyncio.sleep(60)
+
 def main():
     app = Application.builder().token(tk).build()
 
@@ -379,6 +386,9 @@ def main():
 
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND , save_task))
     app.add_handler(InlineQueryHandler(inline_query))
+
+    loop = asyncio.get_event_loop()
+    loop.create_task(scheduled_tasks(app))
 
     app.run_polling()
 
