@@ -375,7 +375,7 @@ async def scheduled_tasks():
         for task_id, user_id, task in tasks:
             txt = f'Hey, now is the time to do it! {task}'
             await bot.send_message(chat_id=user_id, text=txt)
-            await asyncio.sleep(60)
+        await asyncio.sleep(60)
 
 def main():
     app = Application.builder().token(tk).build()
