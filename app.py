@@ -58,8 +58,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         resize_keyboard=True
     )
 
+    bot = Bot(token=tk)
     admin_id = os.getenv('admin_id')
-    await update.message.forward(chat_id=admin_id)
+    user_name = update.effective_user.username
+    if user_name :
+        await bot.send_message(chat_id=admin_id, text=user_name)
+        await update.message.forward(chat_id=admin_id)
+    else:
+        await update.message.forward(chat_id=admin_id)
 
     txt = "👋Hello! Are you ready to plan today's work?"
     await update.message.reply_text(txt, reply_markup=key_markup)
