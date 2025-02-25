@@ -1,4 +1,3 @@
-import telegram
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram.ext import MessageHandler, filters, InlineQueryHandler
@@ -41,7 +40,7 @@ def creat_table():
     )"""
     cursor.execute(query)
     db.commit()
-#creat_table()
+creat_table()
 
 tk = os.getenv('token')
 
@@ -84,14 +83,14 @@ async def edit_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if result and result[0] > 0:
         user_states[user_id] = 'edit_task'
 
-        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
+        query = "SELECT task, status, task_time FROM tasks WHERE user_id = %s ORDER BY created_at"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
         if tasks_db:
             task_list = "\n".join(
-                [f"{task[0]}. {task[1].strip()} {" - " + str(task[3])[:-3] if task[3] else ""}{" ✔" if task[2] == "done" else ""}" for task in
-                 tasks_db])
+                [f"{i+1}. {task[0].strip()} {' - ' + str(task[2])[:-3] if task[2] else ''}{' ✔' if task[1] == 'done' else ''}"
+                 for i, task in enumerate(tasks_db)])
 
         txt = '📝Please enter the editing task number'
         txt1 = '📋your tasks:'
@@ -109,14 +108,14 @@ async def delete_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if result and result[0] > 0:
         user_states[user_id] = 'deleted_task'
 
-        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
+        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s ORDER BY created_at"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
         if tasks_db:
             task_list = "\n".join(
-                [f"{task[0]}. {task[1].strip()} {" - " + str(task[3])[:-3] if task[3] else ""}{" ✔" if task[2] == "done" else ""}" for task in
-                 tasks_db])
+                [f"{i+1}. {task[1].strip()} {' - ' + str(task[3])[:-3] if task[3] else ''}{' ✔' if task[2] == 'done' else ''}"
+                 for i, task in enumerate(tasks_db)])
 
         txt = '🗑Enter the task number you want to delete.'
         txt1 = '📋your tasks:'
@@ -134,14 +133,14 @@ async def done_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if result and result[0] > 0:
         user_states[user_id] = 'done task'
 
-        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
+        query = "SELECT task, status, task_time FROM tasks WHERE user_id = %s ORDER BY created_at"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
         if tasks_db:
             task_list = "\n".join(
-                [f"{task[0]}. {task[1].strip()} {" - " + str(task[3])[:-3] if task[3] else ""}{" ✔" if task[2] == "done" else ""}" for task in
-                 tasks_db])
+                [f"{i+1}. {task[0].strip()} {' - ' + str(task[2])[:-3] if task[2] else ''}{' ✔' if task[1] == 'done' else ''}"
+                 for i, task in enumerate(tasks_db)])
 
         txt = '📝Enter the completed task number.'
         txt1 = '📋your tasks:'
@@ -158,26 +157,20 @@ async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     result = cursor.fetchone()
     if result and result[0] > 0:
 
-        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
+        query = "SELECT task, status, task_time FROM tasks WHERE user_id = %s ORDER BY created_at"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
         if tasks_db:
             task_list = "\n".join(
-                [f"{task[0]}. {task[1].strip()} {" - " + str(task[3])[:-3] if task[3] else ""}{" ✔" if task[2] == "done" else ""}" for task in
-                 tasks_db])
+                [f"{i+1}. {task[0].strip()} {' - ' + str(task[2])[:-3] if task[2] else ''}{' ✔' if task[1] == 'done' else ''}"
+                 for i, task in enumerate(tasks_db)])
 
             txt = '📋your tasks:'
             await update.message.reply_text(f'{txt} \n\n {task_list}')
     else:
         txt = '📭 No tasks found!'
         await update.message.reply_text(txt)
-
-def task_exists(user_id, task_number):
-    query = "SELECT COUNT(*) as count FROM tasks WHERE user_id = %s AND id = %s"
-    cursor.execute(query, (user_id, task_number))
-    result = cursor.fetchone()
-    return result and result[0] > 0
 
 async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_chat.id
@@ -189,8 +182,7 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(txt)
         return
 
-    if user_states.get(user_id) == 'adding_task':  # add task
-
+    if user_states.get(user_id) == 'adding_task':
         if user_input :
             user_tasks = [t for t in user_input.splitlines()]
             pattern = re.compile(r'(.+)-(\d{2}):(\d{2})$')
@@ -205,7 +197,6 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     task_text = task
                     task_time = None
 
-
                 query = 'INSERT INTO tasks (user_id, task, status, task_time) VALUES (%s, %s, %s, %s)'
                 values = (user_id, task_text, 'not done', task_time)
                 cursor.execute(query, values)
@@ -219,15 +210,19 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt = '⚠ Please enter a valid task!'
             await update.message.reply_text(txt)
 
-    elif user_states.get(user_id) == 'done task':  # done task
-
+    elif user_states.get(user_id) == 'done task':
         if user_input.isdigit() :
-            task_number = int(user_input)
+            task_number = int(user_input) - 1
 
-            if task_exists(user_id, task_number):
+            query = "SELECT id FROM tasks WHERE user_id = %s ORDER BY created_at"
+            cursor.execute(query, (user_id,))
+            tasks_db = cursor.fetchall()
+
+            if 0 <= task_number < len(tasks_db):
+                task_id = tasks_db[task_number][0]
 
                 query = "UPDATE tasks SET status = 'done' WHERE user_id = %s AND id = %s"
-                cursor.execute(query, (user_id, task_number))
+                cursor.execute(query, (user_id, task_id))
                 db.commit()
 
                 user_states.pop(user_id)
@@ -241,16 +236,20 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt = '✖️Please enter an English number.'
             await update.message.reply_text(txt)
 
-    elif user_states.get(user_id) == 'edit_task': # edit task
-
+    elif user_states.get(user_id) == 'edit_task':
         if user_input.isdigit():
-            task_number = int(user_input)
+            task_number = int(user_input) - 1
 
-            if task_exists(user_id, task_number):
+            query = "SELECT id FROM tasks WHERE user_id = %s ORDER BY created_at"
+            cursor.execute(query, (user_id,))
+            tasks_db = cursor.fetchall()
+
+            if 0 <= task_number < len(tasks_db):
+                task_id = tasks_db[task_number][0]
 
                 user_states[user_id] = 'editing_task'
                 user_states.pop(f'editing_task_{user_id}', None)
-                user_states[f'editing_task_{user_id}'] = task_number
+                user_states[f'editing_task_{user_id}'] = task_id
 
                 txt = '✏️ Now, please enter the new text for the task.'
                 await update.message.reply_text(txt)
@@ -262,15 +261,17 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt = '✖️Please enter an English number.'
             await update.message.reply_text(txt)
 
-    elif user_states.get(user_id) == 'editing_task': # editing task
-        task_number = user_states[f'editing_task_{user_id}']
+    elif user_states.get(user_id) == 'editing_task':
+        task_id = user_states[f'editing_task_{user_id}']
 
-        if task_number and user_input :
+        if task_id and user_input :
+            query = "SELECT COUNT(*) as count FROM tasks WHERE user_id = %s AND id = %s"
+            cursor.execute(query, (user_id, task_id))
+            result = cursor.fetchone()
 
-            if task_exists(user_id, task_number):
-
+            if result and result[0] > 0:
                 query = "UPDATE tasks SET task = %s , status = 'not done' WHERE user_id = %s AND id = %s"
-                cursor.execute(query, (user_input, user_id, task_number))
+                cursor.execute(query, (user_input, user_id, task_id))
                 db.commit()
 
                 user_states.pop(user_id)
@@ -286,19 +287,19 @@ async def save_task(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt = '✖️Something went wrong. Please try again.'
             await update.message.reply_text(txt)
 
-    elif user_states.get(user_id) == 'deleted_task': # deleted task
-
+    elif user_states.get(user_id) == 'deleted_task':
         if user_input.isdigit():
-            task_number = int(user_input)
+            task_number = int(user_input) - 1
 
-            if task_exists(user_id, task_number):
+            query = "SELECT id FROM tasks WHERE user_id = %s ORDER BY created_at"
+            cursor.execute(query, (user_id,))
+            tasks_db = cursor.fetchall()
+
+            if 0 <= task_number < len(tasks_db):
+                task_id = tasks_db[task_number][0]
 
                 query = 'DELETE FROM tasks WHERE user_id = %s AND id = %s'
-                cursor.execute(query, (user_id, task_number))
-                db.commit()
-                cursor.execute("SET @new_id = 0")
-                cursor.execute("UPDATE tasks SET id = (@new_id := @new_id + 1) WHERE user_id = %s ORDER BY id", (user_id,))
-                cursor.execute("ALTER TABLE tasks AUTO_INCREMENT = 1")
+                cursor.execute(query, (user_id, task_id))
                 db.commit()
 
                 user_states.pop(user_id)
@@ -341,14 +342,14 @@ async def show_tasks_inline(user_id):
     result = cursor.fetchone()
 
     if result and result[0] > 0:
-        query = "SELECT id, task, status, task_time FROM tasks WHERE user_id = %s"
+        query = "SELECT task, status, task_time FROM tasks WHERE user_id = %s ORDER BY created_at"
         cursor.execute(query, (user_id,))
         tasks_db = cursor.fetchall()
 
         if tasks_db:
             task_list = "\n".join(
-                [f"{task[0]}. {task[1].strip()} {" - " + str(task[3])[:-3] if task[3] else ""}{" ✔" if task[2] == "done" else ""}" for task in
-                 tasks_db])
+                [f"{i+1}. {task[0].strip()} {' - ' + str(task[2])[:-3] if task[2] else ''}{' ✔' if task[1] == 'done' else ''}"
+                 for i, task in enumerate(tasks_db)])
 
             return f'📋 Your tasks:\n\n{task_list}'
     return '📭 No tasks found!'
